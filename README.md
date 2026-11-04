@@ -8,7 +8,9 @@
 
 ## 怎么打开
 
-**双击 `启动游戏.cmd`**。它会起一个本地静态服务器并自动打开浏览器（`http://127.0.0.1:8123/`），关掉那个黑窗口即停止服务。
+**在线直接玩：<https://hugoweston28.github.io/snake-apple-hunt/>**（GitHub Pages，手机和电脑都能开）
+
+本地离线玩：**双击 `启动游戏.cmd`**。它会起一个本地静态服务器并自动打开浏览器（`http://127.0.0.1:8123/`），关掉那个黑窗口即停止服务。
 
 > ⚠️ **不要直接双击 `index.html` / `dist/snake.html`**。
 > 部分环境（安全软件、浏览器策略、企业管控）会拦截 `file://` 下执行的脚本，
@@ -23,8 +25,8 @@ node tools/serve.js 8080     # 指定端口
 node tools/serve.js --open   # 起服务并打开浏览器
 ```
 
-或者挂到 GitHub Pages（https，长期最省事）：仓库根目录已经是可直接部署的 `index.html`，
-在 Settings → Pages 里把 Source 设成 `main` / `/ (root)` 即可。
+GitHub Pages 已经部署好了。仓库根目录就是可部署产物（`index.html`），改完源码 `node build.js`
+重建后提交即可，Pages 会自动更新。
 
 改源码时改 `template.html` 和 `js/*.js`，然后：
 

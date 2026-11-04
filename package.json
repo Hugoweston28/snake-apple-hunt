@@ -1,0 +1,13 @@
+{
+  "name": "snake-apple-hunt",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "100×100 贪吃蛇吃豆：精确最优路线 + 回放 + 人类可玩",
+  "scripts": {
+    "build": "node build.js",
+    "bench": "node bench.js",
+    "bench:quick": "node bench.js --runs 50",
+    "smoke": "node tools/smoke_dom.js"
+  }
+}

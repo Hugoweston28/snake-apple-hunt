@@ -56,7 +56,9 @@ const documentStub = {
   body: bodyEl,
   getElementById(id) {
     if (!elements.has(id)) {
-      elements.set(id, id === 'board' ? Object.assign(makeCanvas(), { id }) : makeEl(id));
+      elements.set(id, (id === 'board' || id === 'fx')
+        ? Object.assign(makeCanvas(), { id })
+        : makeEl(id));
     }
     return elements.get(id);
   },

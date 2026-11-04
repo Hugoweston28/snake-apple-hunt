@@ -51,13 +51,15 @@ snake/
   js/human.js           人类可玩：输入缓冲队列 + 实时最优顾问
   js/skins.js           四套皮肤配置 + 颜色工具（纯数据）
   js/render.js          Canvas 渲染：网格缓存 / 胶囊链蛇身 / 苹果 / 计划路线叠加
+  js/touch.js           触屏滑动转向 + 划痕特效
   js/replay.js          整局录制 + 回放控制器
   js/app.js             界面装配、控件、HUD、主循环
   build.js              把拆分源码内联成单文件（同时产出 index.html 与 dist/snake.html）
   verify.js             独立验证器：拿 moves 重演一遍，逐条核对规则
   bench.js              批量跑分 CLI
   tools/serve.js        本地静态服务器
-  tools/smoke_dom.js    DOM 桩冒烟测试
+  tools/smoke_dom.js    DOM 桩冒烟测试（21 项断言）
+  tools/touch_probe.mjs CDP 模拟手机触摸，验证滑动转向与特效
   tools/inspect_worst.js 差距归因
   tools/make_skins.py   皮肤三视图设计稿
   preview/              皮肤设计稿 + 实机截图
@@ -84,6 +86,17 @@ snake/
 3. **实时对照**：HUD 里的「最佳可达」= 当前步数 + 从你当前位置出发的剩余最优步数。它不是固定的下界，是**你现在还来得及做到的最好成绩**；一旦你走偏，这个数就会大于「理论最优」，立刻可见。
 
 撞死后不弹窗，直接在面板里给出：第几步、撞什么、该 seed 的理论最优步数。
+
+### 手机 / 触屏：滑动转向
+
+手机上放不了方向键——拇指一按就盖住棋盘的一大块。改成**整块棋盘当摇杆**：
+
+- 手指按在棋盘**任意位置**即为锚点，不必找按钮。
+- 相对锚点滑动超过 24px，取主轴方向发一次转向，**锚点随即移到当前点**，所以不抬手就能连续转向（上→右→下…），正好喂满上面那个长度为 2 的缓冲队列。
+- 特效：沿手指轨迹的划痕光带（深色皮肤用 `lighter` 叠加，浅色皮肤用普通叠加，否则熊猫白底会被洗白）+ 指尖光点 + 每次真正转向处炸开的小涟漪和方向切口。转向有没有被吃进去，看涟漪就知道。
+- 游戏暂停时滑动会自动恢复——手机上的暂停按钮在棋盘下方，不在视野里。
+
+实现：`js/touch.js`（`TouchSteer`），叠加层是 `.board-wrap` 里的 `#fx` canvas，`pointer-events: none`，`touch-action: none` 防止滑动时页面跟着滚。
 
 ### 可分享的对局
 

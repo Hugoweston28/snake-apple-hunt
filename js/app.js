@@ -4,6 +4,7 @@ import { Renderer } from './render.js';
 import { Replay, recordRun } from './replay.js';
 import { SKINS, getSkin } from './skins.js';
 import { HumanSession, KEY_DIR } from './human.js';
+import { TouchSteer } from './touch.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -53,6 +54,24 @@ const state = {
 };
 
 const renderer = new Renderer(els.canvas);
+
+/* ---------------- 触摸转向 + 划痕 ---------------- */
+const coarse = typeof window.matchMedia === 'function'
+  && window.matchMedia('(pointer: coarse)').matches;
+
+const steer = new TouchSteer(document.getElementById('board-wrap'), document.getElementById('fx'), {
+  isEnabled: function () {
+    return state.mode === 'human' && state.human != null && !state.human.finished;
+  },
+  getSkin: function () { return renderer.skin; },
+  onTurn: function (dir) {
+    const s = state.human;
+    if (!s) return;
+    // 手机上暂停按钮在棋盘下方、不在视野内，滑动就当作"继续"
+    if (s.paused) { s.paused = false; syncPlayButton(); }
+    s.queue(dir);
+  },
+});
 
 /* ---------------- 皮肤 ---------------- */
 function swatchCss(list) {
@@ -295,7 +314,9 @@ function renderNote() {
   } else {
     els.note.innerHTML =
       `<b>seed ${g.seed}</b> · 人类对局<br>` +
-      `方向键 / WASD 控制 · 空格暂停 · R 重开<br>` +
+      (coarse
+        ? '手指在棋盘任意位置滑动转向 · 不抬手可连续转<br>'
+        : '方向键 / WASD 控制，也可在棋盘上按住拖动<br>') +
       `虚线是<span class="ok">从你当前位置出发</span>的最优路线，不是 AI 自己的那局。`;
     els.copy.hidden = true;
   }
@@ -388,7 +409,11 @@ function loop(t) {
 
   const f = currentFrame();
   if (f) {
+    if (!steer.size || steer.size[0] !== els.canvas.clientWidth || steer.size[1] !== els.canvas.clientHeight) {
+      steer.resize();
+    }
     renderer.draw(f, (t - tick0) / 1000);
+    steer.render();
     updateHud();
     // 首帧画完才撤掉"启动自检"浮层：中途任何一步抛错，浮层会保留并显示原因
     if (!bootCleared) {
@@ -501,7 +526,10 @@ window.addEventListener('keydown', (e) => {
   else if (e.code === 'KeyR') { e.preventDefault(); els.replay.click(); }
 });
 
-window.addEventListener('resize', () => renderer.resize());
+window.addEventListener('resize', () => {
+  renderer.resize();
+  steer.resize();
+});
 
 /* ---------------- 启动 ---------------- */
 function newSeed() {
@@ -563,7 +591,7 @@ setMode(hp.mode === 'human' ? 'human' : 'ai', {
 
 // 调试/自动化钩子
 if (typeof window !== 'undefined') {
-  window.SNAKE = { state, els, renderer, setMode, startHuman, startRun, HumanSession };
+  window.SNAKE = { state, els, renderer, steer, setMode, startHuman, startRun, HumanSession };
 }
 
 requestAnimationFrame(loop);

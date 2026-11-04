@@ -24,6 +24,7 @@ const MODULES = [
   'js/human.js',
   'js/render.js',
   'js/replay.js',
+  'js/touch.js',
   'js/app.js',
 ];
 
